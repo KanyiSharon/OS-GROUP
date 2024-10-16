@@ -17,7 +17,7 @@ public class actor_behaviour : MonoBehaviour
 {
 
     public enum state
-    { Spawned, waiting, acting, rest, main_act, finished };
+    { Spawned, waiting, acting, rest, main_act, finished, idle };
     TextMeshPro text;
     public state current;
     Rigidbody2D body;
@@ -25,6 +25,7 @@ public class actor_behaviour : MonoBehaviour
     public int rest_counter;
     public int caught_counter;
     Collider2D coll;
+   UnityEngine.Vector3 origin_size;
 
     SpriteRenderer rend;
     int stamina;
@@ -33,6 +34,7 @@ public class actor_behaviour : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        origin_size=transform.lossyScale;
         current = state.Spawned;
         stamina = 3;
         body = GetComponent<Rigidbody2D>();
@@ -46,7 +48,7 @@ public class actor_behaviour : MonoBehaviour
             Debug.Log(g);
         rend.material.color=new Color(r,b,g,1.0f);
       */
-     // text=new TextMeshPro();
+        // text=new TextMeshPro();
         //Instantiate(text, transform.position, quaternion.identity);
 
     }
@@ -60,7 +62,7 @@ public class actor_behaviour : MonoBehaviour
     void update_text()
     {
 
-        text.SetText(current.ToString());
+        // text.SetText(current.ToString());
     }
     void actor_update()
     {
@@ -87,34 +89,65 @@ public class actor_behaviour : MonoBehaviour
                 caught_counter++;
                 current = state.rest;
                 break;
+            case state.idle:
+            erased();
+                break;
             case state.finished:
 
-                Destroy(this.gameObject);
+              erase_self();
                 break;
 
 
         }
     }
 
+    void erase_self()
+    {
+          
+        transform.localScale=new UnityEngine.Vector3(transform.lossyScale.x+(float)0.3,transform.lossyScale.y+(float)0.3,transform.lossyScale.z);
+        if(transform.lossyScale.x>=origin_size.x+20)
+        {
+            Destroy(this.gameObject);
+        }
+    }
+    public void erased()
+    {
+        GameObject cont=GameObject.FindGameObjectWithTag("GameController");
+    
+        body.position = new UnityEngine.Vector2(body.position.x , body.position.y+ (float)0.03);
+        if(transform.position.y>=cont.transform.position.y)
+        {
+             Destroy(this.gameObject);
+        }
+
+  
+    }
     void path_find()
     {
 
-        float Target = find_ball().position.x;
-
-        if (Target != transform.position.x)
+        if (check_closest())
         {
-            if (transform.position.x > Target)
+            float Target = find_ball().position.x;
+
+            if (Target != transform.position.x)
             {
-                move_right();
-                last_move = "right";
+                if (transform.position.x > Target)
+                {
+                    move_right();
+                    last_move = "right";
+                }
+                else
+                {
+                    move_left();
+                }
+
+
+
             }
-            else
-            {
-                move_left();
-            }
-
-
-
+        }
+        else
+        {
+            current = state.waiting;
         }
     }
     void rest()
@@ -233,7 +266,7 @@ public class actor_behaviour : MonoBehaviour
     }
     public void make_stop()
     {
-        current = state.finished;
+        current = state.idle;
     }
 
 

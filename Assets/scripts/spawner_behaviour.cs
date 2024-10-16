@@ -22,12 +22,13 @@ public class spawner_behaviour : MonoBehaviour
     float vector;
     int obj_counter;
     Vector2 spawn_loc;
+
     // Start is called before the first frame updatez
     void Start()
     {
         body = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
-        spawn_loc = GameObject.FindGameObjectWithTag("sp_loc").GetComponent<Rigidbody2D>().position;
+        
     }
 
     // Update is called once per frame
@@ -54,6 +55,7 @@ public class spawner_behaviour : MonoBehaviour
     }
     void spawn()
     {
+            
         if (Input.GetKeyDown(KeyCode.S) && !start_counter)
 
         {
@@ -62,8 +64,19 @@ public class spawner_behaviour : MonoBehaviour
             float g = UnityEngine.Random.Range(67, 205);
             actor_p.GetComponent<SpriteRenderer>().sharedMaterial.color = new Color(r, b, g, 1.0f);
 
+            GameObject[] objs=GameObject.FindGameObjectsWithTag("sp_loc");
+            for(int i=0;i<objs.Length;i++)
+            {
+                if(objs[i].GetComponent<Rigidbody2D>().position.x >= transform.position.x - 2  && objs[i].GetComponent<Rigidbody2D>().position.x <= transform.position.x + 2 )
+                {
+                    spawn_loc=objs[i].GetComponent<Rigidbody2D>().position;
+                }
+            }
+        if(spawn_loc.x!=0)
+        {
             Instantiate(actor_p, spawn_loc, Quaternion.identity);
             start_counter = true;
+        }
         }
         if (start_counter)
         {
